@@ -1,5 +1,6 @@
 const usersService = require('./users-service');
 const { errorResponder, errorTypes } = require('../../../core/errors');
+const userSchema = require('../../../models/users-schema');
 
 /**
  * Handle get list of users request
@@ -50,6 +51,24 @@ async function createUser(request, response, next) {
     const name = request.body.name;
     const email = request.body.email;
     const password = request.body.password;
+    const confrimPassword = request.body.confrimPassword;
+
+    const emailtersdia = await usersService.MengecekEmail(email);
+    if (emailtersdia) {
+      throw errorResponder(
+        errorTypes.EMAIL_ALREADY_TAKEN,
+        'Email anda sudah terdaftar'
+      );
+    }
+
+    const pass = await password;
+    const passconfrim = await confrimPassword;
+    if (passconfrim != pass) {
+      throw errorResponder(
+        errorTypes.INVALID_PASSWORD,
+        'Password anda tidak sama'
+      );
+    }
 
     const success = await usersService.createUser(name, email, password);
     if (!success) {
