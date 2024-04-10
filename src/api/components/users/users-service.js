@@ -107,10 +107,60 @@ async function deleteUser(id) {
   return true;
 }
 
+// memanggil fungsi mengecekEmail pada users-repository
+
+// async itu fungsi sembarang
+async function cekEmail(email) {
+  try {
+    const emailCek = await usersRepository.mengecekEmail(email);
+    if (emailCek) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    // kalau pakai fungsi try harus ada catch untuk return error
+    console.error('gagal untuk mengecek email:', error);
+    return false;
+  }
+}
+
+async function cekPassLama(id, passLama) {
+  const users = await usersRepository.getUser(id);
+  const pass = users ? users.password : '<RANDOM_PASSWORD_FILLER>';
+  const passcheck = await passwordMatched(passLama, pass);
+
+  if (users && passcheck) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// fungsi update password
+async function updatepass(id, passBaru) {
+  const passhash = await hashPassword(passBaru);
+  const users = await usersRepository.getUser(id);
+
+  if (!users) {
+    return null;
+  }
+
+  try {
+    await usersRepository.changepw(id, passhash);
+  } catch (error) {
+    return null;
+  }
+  return true;
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUser,
   deleteUser,
+  cekEmail,
+  cekPassLama,
+  updatepass,
 };
